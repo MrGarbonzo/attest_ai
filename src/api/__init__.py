@@ -5,6 +5,7 @@ from .chat import router as chat_router
 from .secretai import router as secretai_router
 from .arweave import router as arweave_router
 from .proofs import router as proofs_router
+from .environment import router as environment_router
 
 router = APIRouter()
 
@@ -14,6 +15,7 @@ router.include_router(chat_router, prefix="/chat", tags=["chat"])
 router.include_router(secretai_router, prefix="/secretai", tags=["secretai"])
 router.include_router(arweave_router, prefix="/arweave", tags=["arweave"])
 router.include_router(proofs_router, prefix="/proofs", tags=["proofs"])
+router.include_router(environment_router, prefix="/environment", tags=["environment"])
 
 @router.get("/")
 async def api_info():
@@ -27,6 +29,7 @@ async def api_info():
             "secretai": "/api/secretai",
             "arweave": "/api/arweave",
             "proofs": "/api/proofs",
+            "environment": "/api/environment",
             "health": "/health"
         }
     }

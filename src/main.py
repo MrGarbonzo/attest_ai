@@ -13,6 +13,7 @@ from .api import router as api_router
 from .attestation import SelfAttestationClient
 from .chat import SecretAIClient
 from .arweave import ArweaveClient
+from .utils.environment import EnvironmentDetector
 
 # Configure logging
 logging.basicConfig(
@@ -25,16 +26,46 @@ logger = logging.getLogger(__name__)
 attestation_client = None
 secret_ai_client = None
 arweave_client = None
+environment_detector = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage application lifecycle"""
-    global attestation_client, secret_ai_client, arweave_client
+    global attestation_client, secret_ai_client, arweave_client, environment_detector
     
     # Startup
     logger.info("Starting attest_ai application...")
     settings = get_settings()
+    
+    # Initialize environment detector
+    environment_detector = EnvironmentDetector(settings)
+    await environment_detector.__aenter__()
+    
+    # Detect environment and apply optimizations
+    logger.info("Detecting deployment environment...")
+    env_report = await environment_detector.get_comprehensive_environment_report()
+    
+    logger.info(f"Environment type: {env_report['summary']['environment_type']}")
+    logger.info(f"Confidence score: {env_report['summary']['confidence_score']:.2f}")
+    logger.info(f"Detected features: {', '.join(env_report['summary']['detected_features'])}")
+    
+    # Log optimization recommendations
+    for recommendation in env_report['optimization']['recommendations']:
+        if recommendation.startswith('CRITICAL'):
+            logger.error(recommendation)
+        elif recommendation.startswith('WARNING'):
+            logger.warning(recommendation)
+        else:
+            logger.info(f"Optimization: {recommendation}")
+    
+    # Apply optimized settings
+    optimized_settings = env_report['optimization']['recommended_settings']
+    logger.info(f"Applied optimization for: {optimized_settings.get('optimized_for', 'default')}")
+    
+    # Store environment info in app state
+    app.state.environment_report = env_report
+    app.state.optimized_settings = optimized_settings
     
     # Initialize self-attestation client
     attestation_client = SelfAttestationClient()
@@ -73,6 +104,8 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down attest_ai application...")
     if attestation_client:
         await attestation_client.__aexit__(None, None, None)
+    if environment_detector:
+        await environment_detector.__aexit__(None, None, None)
 
 
 # Create FastAPI app
@@ -117,12 +150,13 @@ async def root():
 @app.get("/health")
 async def health_check():
     """Health check endpoint for Docker/monitoring"""
-    global attestation_client, secret_ai_client, arweave_client
+    global attestation_client, secret_ai_client, arweave_client, environment_detector
     
     health_status = {
         "status": "healthy",
         "version": "0.1.0",
-        "services": {}
+        "services": {},
+        "environment": {}
     }
     
     # Check self-attestation
@@ -149,6 +183,20 @@ async def health_check():
         }
     else:
         health_status["services"]["arweave"] = {"initialized": False}
+    
+    # Add environment information
+    if environment_detector:
+        try:
+            env_info = app.state.environment_report['summary'] if hasattr(app.state, 'environment_report') else {}
+            health_status["environment"] = {
+                "type": env_info.get('environment_type', 'unknown'),
+                "is_secretvm": env_info.get('environment_type') == 'SecretVM',
+                "confidence_score": env_info.get('confidence_score', 0.0),
+                "detected_features": env_info.get('detected_features', []),
+                "resource_status": env_info.get('resource_status', 'unknown')
+            }
+        except Exception as e:
+            health_status["environment"] = {"error": str(e)}
     
     # Overall status
     critical_services_ok = health_status["services"]["self_attestation"]["available"]
