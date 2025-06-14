@@ -401,7 +401,7 @@ jobs:
           echo "✅ Rollback report created"
 
       - name: Upload Rollback Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: rollback-artifacts-${{ github.run_id }}
@@ -444,7 +444,7 @@ jobs:
           secretvm-cli auth login -w "${{ secrets.SECRETVM_WALLET_ADDRESS }}"
 
       - name: Download Rollback Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: rollback-artifacts-${{ github.run_id }}
           path: artifacts
@@ -568,7 +568,7 @@ jobs:
           echo "✅ Final rollback summary created"
 
       - name: Upload Final Summary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: final-rollback-summary-${{ github.run_id }}
           path: final_rollback_summary.md

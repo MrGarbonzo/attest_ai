@@ -23,7 +23,14 @@
   - Debug/test mode: Only requires minimal fields (kty)
   - Updated all test JWKs to include the 'd' field for private key
 
-### 4. Updated Files
+### 4. GitHub Actions Artifact Actions Update
+- **Issue**: GitHub deprecated v3 of upload-artifact and download-artifact actions
+- **Solution**: Updated all workflows to use v4:
+  - Changed all `actions/upload-artifact@v3` to `actions/upload-artifact@v4`
+  - Changed all `actions/download-artifact@v3` to `actions/download-artifact@v4`
+  - This affects all artifact handling in CI/CD pipeline
+
+### 5. Updated Files
 
 #### requirements.txt
 ```txt
