@@ -23,9 +23,6 @@ pydantic-settings==2.1.0
 # HTTP client for Arweave API
 requests==2.31.0
 
-# Cryptography for proof verification
-cryptography==41.0.8
-
 # Utilities
 cachetools==5.3.2
 python-multipart==0.0.6
@@ -119,7 +116,6 @@ Updated all GitHub Actions workflows to install dependencies explicitly:
     pip install pydantic==2.5.2
     pip install pydantic-settings==2.1.0
     pip install requests==2.31.0
-    pip install cryptography==41.0.8
     pip install cachetools==5.3.2
     pip install python-multipart==0.0.6
     pip install aiofiles==23.2.1
