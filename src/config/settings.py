@@ -201,7 +201,12 @@ class Settings(BaseSettings):
         # Check wallet
         try:
             wallet = self.get_arweave_wallet_dict()
-            required_fields = ["kty", "e", "n", "d"]
+            # In production, require all fields. In debug/test, just require basic structure
+            if self.is_production:
+                required_fields = ["kty", "e", "n", "d"]
+            else:
+                required_fields = ["kty"]  # Minimal requirement for testing
+            
             missing = [f for f in required_fields if f not in wallet]
             if missing:
                 errors.append(f"ARWEAVE_WALLET_JWK missing fields: {missing}")

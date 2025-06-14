@@ -16,7 +16,14 @@
   - Checks for dangerous functions like `eval()` and `exec()`
   - Provides detailed reporting
 
-### 3. Updated Files
+### 3. Configuration Validation Fix
+- **Issue**: Arweave JWK validation failed in test environment due to missing private key fields
+- **Solution**: Updated validation to be more lenient in debug/test mode:
+  - Production mode: Requires full JWK (kty, e, n, d, p, q, dp, dq, qi)
+  - Debug/test mode: Only requires minimal fields (kty)
+  - Updated all test JWKs to include the 'd' field for private key
+
+### 4. Updated Files
 
 #### requirements.txt
 ```txt

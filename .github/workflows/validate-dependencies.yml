@@ -77,7 +77,7 @@ jobs:
           
           # Set minimal environment variables
           export SECRET_AI_API_KEY="test_key"
-          export ARWEAVE_WALLET_JWK='{"kty":"RSA","e":"AQAB","n":"test"}'
+          export ARWEAVE_WALLET_JWK='{"kty":"RSA","e":"AQAB","n":"test","d":"test_private"}'
           export APP_DEBUG=true
           
           python -c "
@@ -106,7 +106,7 @@ jobs:
           
           # Test with valid configuration
           export SECRET_AI_API_KEY="test_key_12345"
-          export ARWEAVE_WALLET_JWK='{"kty":"RSA","e":"AQAB","n":"test_value"}'
+          export ARWEAVE_WALLET_JWK='{"kty":"RSA","e":"AQAB","n":"test_value","d":"test_private"}'
           export APP_DEBUG=true
           
           python -c "
