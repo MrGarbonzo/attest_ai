@@ -37,11 +37,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Convert repository name to lowercase
+        id: repo
+        run: |
+          echo "name=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ steps.repo.outputs.name }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -77,7 +82,7 @@ jobs:
           
           services:
             attest_ai:
-              image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+              image: ${{ env.REGISTRY }}/${{ steps.repo.outputs.name }}:${{ steps.meta.outputs.version }}
               container_name: attest_ai
               ports:
                 - "8000:8000"
@@ -119,13 +124,13 @@ jobs:
           
           ## Docker Image
           
-          Image: `${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}`
+          Image: `${{ env.REGISTRY }}/${{ steps.repo.outputs.name }}:${{ steps.meta.outputs.version }}`
           
           ## Quick Start
           
           1. **Pull the Docker image:**
              ```bash
-             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+             docker pull ${{ env.REGISTRY }}/${{ steps.repo.outputs.name }}:${{ steps.meta.outputs.version }}
              ```
           
           2. **Create environment file (.env):**
@@ -183,8 +188,8 @@ jobs:
           echo "🐳 Docker Image Summary"
           echo "======================="
           echo "Registry: ${{ env.REGISTRY }}"
-          echo "Image: ${{ env.IMAGE_NAME }}"
+          echo "Image: ${{ steps.repo.outputs.name }}"
           echo "Tags: ${{ steps.meta.outputs.tags }}"
           echo ""
           echo "Pull command:"
-          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}"
+          echo "docker pull ${{ env.REGISTRY }}/${{ steps.repo.outputs.name }}:${{ steps.meta.outputs.version }}"
