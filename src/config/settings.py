@@ -125,15 +125,15 @@ class Settings(BaseSettings):
         """Auto-detect SecretVM environment"""
         try:
             # Check if self-attestation endpoint is available
-            import requests
             try:
+                import requests
                 response = requests.get(self.SELF_ATTESTATION_URL, timeout=5)
                 if response.status_code == 200:
                     html_content = response.text.lower()
                     # Look for SecretVM-specific content
                     if any(keyword in html_content for keyword in ['mr_td', 'rtmr', 'report_data']):
                         return True
-            except:
+            except Exception:
                 pass
             
             # Check for SecretVM-specific environment variables

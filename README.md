@@ -10,7 +10,7 @@ attest_ai generates cryptographic proofs of AI interactions by:
 - **Arweave Storage**: Stores proof metadata on Arweave blockchain with smart mock logic
 - **Web Interface**: Provides complete workflow demonstration with side-by-side attestation display
 
-## Features (Phase 3 Complete - Production Ready!)
+## Features (Phase 5 Complete - Enterprise Ready!)
 
 ✅ **Self-Attestation**: Always-available VM attestation with comprehensive error handling  
 ✅ **Secret AI Integration**: Discovery, health checks, chat with robust retry logic  
@@ -20,6 +20,9 @@ attest_ai generates cryptographic proofs of AI interactions by:
 ✅ **Error Handling**: Comprehensive exception system with user-friendly messages  
 ✅ **Docker Integration**: Production-ready containerization with health checks  
 ✅ **Testing Suite**: Complete integration testing for deployment validation  
+✅ **SecretVM Deployment**: Complete deployment automation for SecretVM  
+✅ **CI/CD Pipeline**: GitHub Actions automation with rollback capabilities  
+✅ **Production Monitoring**: Real-time monitoring and management tools  
 
 ## Quick Start
 
@@ -37,6 +40,36 @@ attest_ai generates cryptographic proofs of AI interactions by:
    ```
 
 3. **Access Application**: http://localhost:8000
+
+## CI/CD Deployment (Phase 5)
+
+### GitHub Actions Setup
+
+1. **Configure GitHub Secrets**:
+   ```
+   SECRETVM_WALLET_ADDRESS  # Your SecretVM wallet address
+   SECRET_AI_API_KEY        # Secret AI master API key
+   ARWEAVE_WALLET_JWK       # Arweave wallet in JWK format
+   ```
+
+2. **Automatic Deployment**:
+   - Push to `main` branch → Automatic staging deployment
+   - Manual workflow dispatch → Production deployment with approval
+
+3. **Emergency Rollback**:
+   - Manual rollback workflow available
+   - Automated previous VM restoration
+
+### SecretVM Production Deployment
+
+```bash
+# One-command deployment
+./scripts/deploy_secretvm.sh
+
+# Or use GitHub Actions for full automation
+```
+
+See `SECRETVM_DEPLOYMENT_GUIDE.md` for complete deployment instructions.
 
 ## Usage
 
