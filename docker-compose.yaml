@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  attest_ai:
+    build: .
+    container_name: attest_ai
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_AI_API_KEY=${SECRET_AI_API_KEY}
+      - SECRET_AI_DISCOVERY_CACHE_TTL=${SECRET_AI_DISCOVERY_CACHE_TTL:-3600}
+      - ARWEAVE_WALLET_JWK=${ARWEAVE_WALLET_JWK}
+      - ARWEAVE_GATEWAY=${ARWEAVE_GATEWAY:-https://arweave.net}
+      - ENABLE_ARWEAVE_UPLOAD=${ENABLE_ARWEAVE_UPLOAD:-true}
+      - MOCK_UNFUNDED_TRANSACTIONS=${MOCK_UNFUNDED_TRANSACTIONS:-true}
+      - SELF_ATTESTATION_URL=${SELF_ATTESTATION_URL:-http://localhost:29343}
+      - APP_HOST=0.0.0.0
+      - APP_PORT=8000
+      - APP_DEBUG=${APP_DEBUG:-false}
+      - CACHE_TTL_SECONDS=${CACHE_TTL_SECONDS:-300}
+      - MOCK_SECRET_AI_ATTESTATION=${MOCK_SECRET_AI_ATTESTATION:-false}
+      - MOCK_ARWEAVE_UPLOAD=${MOCK_ARWEAVE_UPLOAD:-false}
+    volumes:
+      - ./static:/app/static:ro
+      - ./templates:/app/templates:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - attest_network
+    # For SecretVM deployment - access to host attestation endpoint
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  attest_network:
+    driver: bridge

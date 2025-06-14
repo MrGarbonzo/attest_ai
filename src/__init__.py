@@ -1,0 +1,1 @@
+# attest_ai - Cryptographic proof generation for AI interactions in SecretVM
