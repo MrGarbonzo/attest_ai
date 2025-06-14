@@ -1,0 +1,190 @@
+name: Build and Publish Docker Image
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            VCS_REF=${{ github.sha }}
+            VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+
+      - name: Generate deployment artifacts
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "📦 Creating deployment artifacts..."
+          
+          # Create docker-compose for deployment
+          cat > docker-compose.deployment.yml << 'EOF'
+          version: '3.8'
+          
+          services:
+            attest_ai:
+              image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+              container_name: attest_ai
+              ports:
+                - "8000:8000"
+              environment:
+                # These will be provided via .env file during deployment
+                - SECRET_AI_API_KEY=${SECRET_AI_API_KEY}
+                - ARWEAVE_WALLET_JWK=${ARWEAVE_WALLET_JWK}
+                - DEPLOYMENT_ENVIRONMENT=${DEPLOYMENT_ENVIRONMENT:-production}
+                - SECRETVM_DEPLOYMENT=${SECRETVM_DEPLOYMENT:-true}
+                - APP_DEBUG=${APP_DEBUG:-false}
+                - LOG_LEVEL=${LOG_LEVEL:-WARNING}
+                - APP_HOST=0.0.0.0
+                - APP_PORT=8000
+                - CACHE_TTL_SECONDS=${CACHE_TTL_SECONDS:-300}
+                - SECRET_AI_DISCOVERY_CACHE_TTL=${SECRET_AI_DISCOVERY_CACHE_TTL:-3600}
+                - ARWEAVE_GATEWAY=${ARWEAVE_GATEWAY:-https://arweave.net}
+                - ENABLE_ARWEAVE_UPLOAD=${ENABLE_ARWEAVE_UPLOAD:-true}
+                - MOCK_UNFUNDED_TRANSACTIONS=${MOCK_UNFUNDED_TRANSACTIONS:-true}
+                - MAX_MEMORY_MB=${MAX_MEMORY_MB:-1024}
+                - MAX_CPU_PERCENT=${MAX_CPU_PERCENT:-80}
+              restart: unless-stopped
+              healthcheck:
+                test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+                interval: 30s
+                timeout: 10s
+                retries: 3
+                start_period: 40s
+              networks:
+                - attest_network
+          
+          networks:
+            attest_network:
+              driver: bridge
+          EOF
+          
+          # Create deployment instructions
+          cat > DEPLOYMENT_INSTRUCTIONS.md << 'EOF'
+          # Deployment Instructions for attest_ai
+          
+          ## Docker Image
+          
+          Image: `${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}`
+          
+          ## Quick Start
+          
+          1. **Pull the Docker image:**
+             ```bash
+             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+             ```
+          
+          2. **Create environment file (.env):**
+             ```bash
+             # Copy from .env.production.example
+             cp .env.production.example .env
+             # Edit with your actual credentials
+             nano .env
+             ```
+          
+          3. **Deploy with docker-compose:**
+             ```bash
+             docker-compose -f docker-compose.deployment.yml up -d
+             ```
+          
+          ## Available Tags
+          
+          - `latest` - Latest stable release from main branch
+          - `main` - Latest build from main branch
+          - `sha-XXXXXXX` - Specific commit builds
+          - `v1.0.0` - Semantic version tags (when tagged)
+          
+          ## Environment Variables
+          
+          See `.env.production.example` for all required environment variables.
+          
+          ## Health Check
+          
+          ```bash
+          curl http://localhost:8000/health
+          ```
+          
+          ## Monitoring
+          
+          - Health endpoint: `http://localhost:8000/health`
+          - Environment info: `http://localhost:8000/api/environment/info`
+          - Resource usage: `http://localhost:8000/api/environment/resources`
+          
+          EOF
+          
+          echo "✅ Deployment artifacts created"
+
+      - name: Upload deployment artifacts
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-artifacts-${{ github.sha }}
+          path: |
+            docker-compose.deployment.yml
+            DEPLOYMENT_INSTRUCTIONS.md
+
+      - name: Image scan summary
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "🐳 Docker Image Summary"
+          echo "======================="
+          echo "Registry: ${{ env.REGISTRY }}"
+          echo "Image: ${{ env.IMAGE_NAME }}"
+          echo "Tags: ${{ steps.meta.outputs.tags }}"
+          echo ""
+          echo "Pull command:"
+          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}"
