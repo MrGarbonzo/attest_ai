@@ -54,10 +54,10 @@ attest_ai creates cryptographic proofs that demonstrate:
 4. **Test the application**
    ```bash
    # Health check
-   curl http://localhost:8000/health
+   curl http://localhost:9000/health
    
    # Open web interface
-   open http://localhost:8000
+   open http://localhost:9000
    ```
 
 ## 🏗️ Architecture

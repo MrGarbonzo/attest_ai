@@ -14,13 +14,16 @@ class SecretAIClient:
     def _init_secret_client(self):
         """Initialize the Secret client with proper imports"""
         try:
+            # Try to import Secret AI SDK
             from secret_ai_sdk.secret_ai import ChatSecret
             from secret_ai_sdk.secret import Secret
             self.ChatSecret = ChatSecret
             self.secret_client = Secret()
             self.sdk_available = True
+            print("✅ Secret AI SDK loaded successfully")
         except ImportError as e:
-            print(f"Warning: Secret AI SDK not available: {e}")
+            print(f"⚠️ Warning: Secret AI SDK not available: {e}")
+            print("   Will use mock responses for demonstration")
             self.sdk_available = False
             self.secret_client = None
             self.ChatSecret = None

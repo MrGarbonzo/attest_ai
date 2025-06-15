@@ -4,7 +4,13 @@ import time
 import random
 import string
 from typing import Dict, Any, Optional
-from mnemonic import Mnemonic
+# Optional import - will use mock if not available
+try:
+    from mnemonic import Mnemonic
+    MNEMONIC_AVAILABLE = True
+except ImportError:
+    MNEMONIC_AVAILABLE = False
+    print("⚠️ Warning: mnemonic library not available")
 
 class ArweaveClient:
     def __init__(self):
@@ -32,8 +38,10 @@ class ArweaveClient:
             self.winston_to_ar = winston_to_ar
             self.ar_to_winston = ar_to_winston
             self.lib_available = True
+            print("✅ Arweave Python SDK loaded successfully")
         except ImportError as e:
-            print(f"Warning: Arweave library not available: {e}")
+            print(f"⚠️ Warning: Arweave library not available: {e}")
+            print("   Will use mock transactions for demonstration")
             self.lib_available = False
     
     async def initialize_wallet(self) -> bool:
@@ -45,12 +53,14 @@ class ArweaveClient:
         try:
             # For MVP, we'll create a mock JWK from mnemonic
             # In production, you'd derive the actual key from mnemonic
-            mnemo = Mnemonic("english")
-            
-            # Validate mnemonic
-            if not mnemo.check(self.mnemonic):
-                print("Warning: Invalid mnemonic, using mock wallet")
-                return False
+            if MNEMONIC_AVAILABLE:
+                mnemo = Mnemonic("english")
+                # Validate mnemonic
+                if not mnemo.check(self.mnemonic):
+                    print("Warning: Invalid mnemonic, using mock wallet")
+                    return False
+            else:
+                print("Note: Mnemonic validation skipped (library not available)")
             
             # Create a mock JWK structure (in production, derive from mnemonic)
             # This is a placeholder - real implementation would derive RSA key from mnemonic
