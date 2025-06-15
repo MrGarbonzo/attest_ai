@@ -9,15 +9,15 @@ aiohttp>=3.8.0
 cryptography>=40.0.0
 mnemonic>=0.20
 
-# Arweave
-arweave-python-client>=1.0.0
+# Arweave (commented out due to installation issues - will use mock)
+# arweave-python-client>=1.0.0
 
-# Secret AI SDK 
+# Secret AI SDK (commented out due to installation issues - will use mock)
 # secret-ai-sdk is not on PyPI, install from GitHub
-git+https://github.com/scrtlabs/secret-ai-sdk.git@main#egg=secret-ai-sdk
-secret-sdk>=1.8.1
-langchain>=0.3.0
-langchain-ollama>=0.2.0
+# git+https://github.com/scrtlabs/secret-ai-sdk.git@main#egg=secret-ai-sdk
+# secret-sdk>=1.8.1
+# langchain>=0.3.0
+# langchain-ollama>=0.2.0
 
 # Additional dependencies for compatibility
 pydantic>=2.0.0
