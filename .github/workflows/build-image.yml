@@ -29,16 +29,26 @@ jobs:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Debug registry info
+      run: |
+        echo "Registry: ${{ env.REGISTRY }}"
+        echo "Actor: ${{ github.actor }}"
+        echo "Repository: ${{ github.repository }}"
 
     # CRITICAL: Convert repository name to lowercase
     - name: Set lowercase repository name
-      run: echo "REPO_LOWER=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+      run: |
+        echo "Original repo: ${{ github.repository }}"
+        REPO_LOWER=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+        echo "Lowercase repo: $REPO_LOWER"
+        echo "REPO_LOWER=$REPO_LOWER" >> $GITHUB_ENV
 
     - name: Extract metadata
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}
+        images: ${{ env.REGISTRY }}/mrgarbonzo/attest_ai
         tags: |
           type=ref,event=branch
           type=ref,event=pr
