@@ -2,19 +2,82 @@ import aiohttp
 import ssl
 import hashlib
 import re
+import os
+import socket
 from datetime import datetime
 from typing import Dict, Any, Optional
 
 class AttestationClient:
-    def __init__(self, attestation_url: str = "http://localhost:29343"):
-        self.attestation_url = attestation_url
+    def __init__(self, attestation_url: str = None):
+        if attestation_url:
+            self.attestation_url = attestation_url
+        else:
+            # Get from environment or use autodiscovery
+            self.attestation_url = self._get_attestation_url()
+    
+    def _get_attestation_url(self) -> str:
+        """Get attestation URL from environment or autodiscovery"""
+        # 1. Check environment variable
+        env_url = os.environ.get('ATTESTATION_URL')
+        if env_url:
+            return env_url
+        
+        # 2. Try to discover the public IP of the machine
+        public_ip = self._get_public_ip()
+        if public_ip:
+            # Use standard SecretVM attestation port
+            return f"https://{public_ip}:29343"
+        
+        # 3. Default to localhost
+        return "https://localhost:29343"
+    
+    def _get_public_ip(self) -> Optional[str]:
+        """Try to discover the public IP of this machine"""
+        try:
+            # Method 1: Use metadata service (works on cloud providers)
+            import aiohttp
+            import asyncio
+            
+            async def get_aws_ip():
+                async with aiohttp.ClientSession() as session:
+                    async with session.get('http://169.254.169.254/latest/meta-data/public-ipv4', timeout=aiohttp.ClientTimeout(total=2)) as resp:
+                        if resp.status == 200:
+                            return await resp.text()
+                return None
+            
+            # Try AWS metadata
+            loop = asyncio.new_event_loop()
+            ip = loop.run_until_complete(get_aws_ip())
+            if ip:
+                return ip.strip()
+            
+        except:
+            pass
+        
+        try:
+            # Method 2: Use external service to get public IP
+            import urllib.request
+            response = urllib.request.urlopen('https://api.ipify.org', timeout=2)
+            return response.read().decode('utf8').strip()
+        except:
+            pass
+        
+        return None
         
     async def get_self_attestation(self) -> Dict[str, Any]:
         """Get real attestation from attest_ai's own VM"""
         try:
+            # Create SSL context that doesn't verify certificates (for self-signed certs)
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            
             async with aiohttp.ClientSession() as session:
                 # Get CPU attestation HTML
-                async with session.get(f"{self.attestation_url}/cpu.html") as resp:
+                async with session.get(
+                    f"{self.attestation_url}/cpu.html",
+                    ssl=ssl_context if self.attestation_url.startswith("https") else None
+                ) as resp:
                     if resp.status != 200:
                         raise Exception(f"Attestation endpoint returned {resp.status}")
                     
@@ -35,7 +98,7 @@ class AttestationClient:
                         "report_data": attestation_data.get("report_data", ""),
                         "tls_fingerprint": tls_fingerprint,
                         "timestamp": datetime.utcnow().isoformat() + "Z",
-                        "instance_url": "localhost:29343",
+                        "instance_url": self.attestation_url.replace("https://", "").replace("http://", ""),
                         "success": True,
                         "mock": False
                     }
@@ -93,11 +156,13 @@ class AttestationClient:
             if self.attestation_url.startswith("https"):
                 # Create SSL context
                 ssl_context = ssl.create_default_context()
+                ssl_context.check_hostname = False
+                ssl_context.verify_mode = ssl.CERT_NONE
                 
                 async with aiohttp.ClientSession() as session:
                     async with session.get(
                         f"{self.attestation_url}/cpu.html",
-                        ssl=ssl_context
+                        ssl=ssl_context if self.attestation_url.startswith("https") else None
                     ) as resp:
                         # Get the peer certificate
                         transport = resp.connection.transport

@@ -9,4 +9,5 @@ services:
       - ARWEAVE_GATEWAY=${ARWEAVE_GATEWAY}
       - API_PORT=${API_PORT}
       - DEBUG=${DEBUG}
+      - ATTESTATION_URL=${ATTESTATION_URL}
     restart: unless-stopped
