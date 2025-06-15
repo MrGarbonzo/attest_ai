@@ -58,6 +58,13 @@ jobs:
           type=sha,prefix={{branch}}-
           type=raw,value=latest,enable={{is_default_branch}}
 
+    - name: Debug push settings
+      run: |
+        echo "Event name: ${{ github.event_name }}"
+        echo "Is pull request: ${{ github.event_name == 'pull_request' }}"
+        echo "Should push: ${{ github.event_name != 'pull_request' }}"
+        echo "Target tags: ${{ steps.meta.outputs.tags }}"
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
@@ -70,6 +77,14 @@ jobs:
 
     - name: Image digest
       run: echo ${{ steps.meta.outputs.digest }}
+      
+    - name: List packages after push
+      if: ${{ github.event_name != 'pull_request' }}
+      run: |
+        echo "Checking if package was created..."
+        curl -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
+             -H "Accept: application/vnd.github+json" \
+             "https://api.github.com/user/packages?package_type=container" || echo "Failed to list packages"
       
     - name: Workflow complete
       run: echo "Docker image build and push completed successfully"
