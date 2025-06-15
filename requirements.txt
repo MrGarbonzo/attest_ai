@@ -9,13 +9,14 @@ aiohttp>=3.8.0
 cryptography>=40.0.0
 mnemonic>=0.20
 
-# Arweave (may not be available - graceful fallback in code)
-# arweave-python-client>=1.0.0
+# Arweave
+arweave-python-client>=1.0.0
 
-# Secret AI SDK (may not be available - graceful fallback in code) 
-# secret-sdk>=1.8.1
-# langchain>=0.3.0
-# langchain-ollama>=0.2.0
+# Secret AI SDK 
+secret-ai-sdk>=0.1.0
+secret-sdk>=1.8.1
+langchain>=0.3.0
+langchain-ollama>=0.2.0
 
 # Additional dependencies for compatibility
 pydantic>=2.0.0
