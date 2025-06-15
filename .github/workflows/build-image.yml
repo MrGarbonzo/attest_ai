@@ -30,7 +30,7 @@ jobs:
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ secrets.PAT_TOKEN }}
         
     - name: Debug registry info
       run: |
@@ -51,41 +51,22 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: |
-          ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}
-          ${{ env.REGISTRY }}/${{ github.repository_owner }}/attest_ai
+        images: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}
         tags: |
           type=ref,event=branch
           type=ref,event=pr
           type=sha,prefix={{branch}}-
           type=raw,value=latest,enable={{is_default_branch}}
 
-    - name: Build Docker image (test only)
+    - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
         context: .
-        push: false
+        push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-        outputs: type=docker,dest=/tmp/attest_ai.tar
-        
-    - name: Test Docker image
-      run: |
-        docker load -i /tmp/attest_ai.tar
-        echo "Docker image built successfully!"
-        docker images | grep attest_ai || echo "Image loaded"
-        
-    # Uncomment below when GHCR permissions are resolved
-    # - name: Push to GitHub Container Registry
-    #   uses: docker/build-push-action@v5
-    #   with:
-    #     context: .
-    #     push: true
-    #     tags: ${{ steps.meta.outputs.tags }}
-    #     labels: ${{ steps.meta.outputs.labels }}
-    #     cache-from: type=gha
 
     - name: Image digest
       run: echo ${{ steps.meta.outputs.digest }}
