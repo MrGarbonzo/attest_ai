@@ -9,8 +9,8 @@ aiohttp>=3.8.0
 cryptography>=40.0.0
 mnemonic>=0.20
 
-# Arweave (commented out due to installation issues - will use mock)
-# arweave-python-client>=1.0.0
+# Arweave
+arweave-python-client>=1.0.0
 
 # Secret AI SDK (commented out due to installation issues - will use mock)
 # secret-ai-sdk is not on PyPI, install from GitHub

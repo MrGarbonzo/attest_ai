@@ -10,7 +10,9 @@ WORKDIR /app
 
 # Copy and install requirements first (Docker cache optimization)
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install 'secret-sdk>=1.8.1' && \
+    pip install secret-ai-sdk
 
 # Copy application code
 COPY . .
