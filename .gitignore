@@ -1,0 +1,9 @@
+.env
+.env.local
+.env.production
+*.key
+*.pem
+arweave_wallet.json
+__pycache__/
+*.pyc
+.pytest_cache/

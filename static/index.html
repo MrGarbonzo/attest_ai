@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>attest_ai - Attested Secret AI Chat</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 attest_ai</h1>
+            <p>Cryptographically verified Secret AI conversations</p>
+        </header>
+        
+        <!-- Chat Interface -->
+        <section class="chat-section">
+            <div class="chat-area">
+                <div id="messages"></div>
+            </div>
+            
+            <div class="input-area">
+                <input type="text" id="messageInput" placeholder="Ask Secret AI anything..." maxlength="500">
+                <input type="password" id="passwordInput" placeholder="Encryption password" maxlength="100">
+                <button onclick="sendMessage()" id="sendButton">Send Message</button>
+                <div class="password-note">
+                    💡 This password encrypts your conversation proof - remember it to decrypt later
+                </div>
+            </div>
+        </section>
+        
+        <!-- Proof Actions -->
+        <section class="proof-section" id="proofSection" style="display: none;">
+            <h3>🔏 Cryptographic Proof Generated</h3>
+            <div class="action-buttons">
+                <button onclick="downloadProof()" class="download-btn">📥 Download Proof</button>
+                <button onclick="uploadToArweave()" class="upload-btn">🌐 Upload to Arweave</button>
+            </div>
+            <div id="uploadStatus" class="status-area"></div>
+        </section>
+        
+        <!-- System Status -->
+        <section class="status-section">
+            <div class="status-grid">
+                <!-- Wallet Info -->
+                <div class="status-card">
+                    <h4>💰 Arweave Wallet</h4>
+                    <div id="walletInfo">Loading...</div>
+                </div>
+                
+                <!-- Self Attestation -->
+                <div class="status-card">
+                    <h4>🛡️ attest_ai VM</h4>
+                    <div id="selfAttestation">Not loaded</div>
+                </div>
+                
+                <!-- Secret AI Status -->
+                <div class="status-card">
+                    <h4>🤖 Secret AI Status</h4>
+                    <div id="secretAiStatus">Ready</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Proof Details (Collapsible) -->
+        <section class="details-section">
+            <details>
+                <summary>🔍 Last Proof Details</summary>
+                <div id="proofDetails">No proof generated yet</div>
+            </details>
+        </section>
+    </div>
+    
+    <script src="/static/script.js"></script>
+</body>
+</html>
