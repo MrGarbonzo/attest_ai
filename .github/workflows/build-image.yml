@@ -57,3 +57,6 @@ jobs:
 
     - name: Image digest
       run: echo ${{ steps.meta.outputs.digest }}
+      
+    - name: Workflow complete
+      run: echo "Docker image build and push completed successfully"
