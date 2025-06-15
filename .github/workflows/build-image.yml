@@ -15,6 +15,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
+      attestations: write
 
     steps:
     - name: Checkout repository
@@ -35,6 +37,7 @@ jobs:
         echo "Registry: ${{ env.REGISTRY }}"
         echo "Actor: ${{ github.actor }}"
         echo "Repository: ${{ github.repository }}"
+        echo "Token permissions: ${{ github.token && 'Token available' || 'No token' }}"
 
     # CRITICAL: Convert repository name to lowercase
     - name: Set lowercase repository name
@@ -59,7 +62,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        push: true
+        push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
