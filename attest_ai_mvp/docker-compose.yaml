@@ -1,7 +1,8 @@
 services:
   attest-ai:
-    build: .
+    image: ghcr.io/mrgarbonzo/attest_ai:latest
     container_name: attest-ai-mvp
+    pull_policy: always
     ports:
       - "8000:8000"
     environment:
