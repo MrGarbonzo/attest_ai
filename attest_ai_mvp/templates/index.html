@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attest AI - Privacy-Preserving Chat with Attestation</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔒 Attest AI</h1>
+            <p>Privacy-Preserving AI Chat with Cryptographic Attestation</p>
+        </header>
+        
+        <!-- Section 1: Proof Password -->
+        <section id="proof-password-section" class="section">
+            <h3>🔐 Proof Generation</h3>
+            <div class="input-group">
+                <label for="proofPassword">Proof Password (optional):</label>
+                <input type="password" id="proofPassword" placeholder="Enter password to enable automatic proof generation">
+                <small>Leave blank to disable proof generation. With password, encrypted proof files (.attestproof) will be automatically generated for each chat.</small>
+            </div>
+        </section>
+        
+        <!-- Section 2: Chat Interface -->
+        <section id="chat-section" class="section">
+            <h3>💬 AI Chat</h3>
+            <div id="chatMessages" class="chat-messages"></div>
+            <div class="chat-input">
+                <input type="text" id="messageInput" placeholder="Type your message..." maxlength="2000">
+                <button id="sendMessage">Send</button>
+            </div>
+            <div id="chatStatus" class="chat-status"></div>
+        </section>
+        
+        <!-- Section 3: Attestation Status -->
+        <section id="attestation-section" class="section">
+            <h3>🔍 Attestation Status</h3>
+            
+            <div class="attestation-item">
+                <div class="attestation-summary">
+                    <span class="status-indicator" id="selfStatus">⏳</span>
+                    <span class="attestation-name">Host Machine Attestation</span>
+                    <span id="selfStatusText" class="status-text">Checking...</span>
+                    <button class="details-btn" onclick="toggleDetails('selfDetails')">View Details</button>
+                </div>
+                <div id="selfDetails" class="attestation-details hidden">
+                    <div class="details-content">Loading...</div>
+                </div>
+            </div>
+            
+            <div class="attestation-item">
+                <div class="attestation-summary">
+                    <span class="status-indicator" id="secretaiStatus">⏳</span>
+                    <span class="attestation-name">Secret AI Attestation</span>
+                    <span id="secretaiStatusText" class="status-text">Checking...</span>
+                    <button class="details-btn" onclick="toggleDetails('secretaiDetails')">View Details</button>
+                </div>
+                <div id="secretaiDetails" class="attestation-details hidden">
+                    <div class="details-content">Loading...</div>
+                </div>
+            </div>
+            
+            <div class="attestation-summary-overall">
+                <span id="overallStatus" class="overall-status">Overall Attestation Quality: <strong id="attestationQuality">Unknown</strong></span>
+            </div>
+        </section>
+        
+        <!-- Section 4: Download & Decrypt -->
+        <section id="download-section" class="section">
+            <h3>📥 Download Latest Proof</h3>
+            <div class="download-area">
+                <button id="downloadProof" disabled>Download Proof File</button>
+                <div id="downloadStatus" class="status-message">No proof available</div>
+                <div id="latestProofInfo" class="proof-info hidden">
+                    <strong>Latest Proof:</strong>
+                    <div id="proofDetails"></div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="decrypt-section" class="section">
+            <h3>🔓 Decrypt Proof File</h3>
+            <div class="decrypt-area">
+                <div class="file-upload">
+                    <label for="proofFile">Upload .attestproof file:</label>
+                    <input type="file" id="proofFile" accept=".attestproof">
+                </div>
+                <div class="password-input">
+                    <label for="decryptPassword">Decryption password:</label>
+                    <input type="password" id="decryptPassword" placeholder="Enter decryption password">
+                </div>
+                <button id="decryptButton">Decrypt & View</button>
+                <div id="decryptStatus" class="status-message"></div>
+            </div>
+            
+            <div id="decryptedContent" class="hidden">
+                <h4>📋 Decrypted Proof Content</h4>
+                <div class="proof-sections">
+                    <div class="proof-section">
+                        <h5>💬 Chat Data</h5>
+                        <div id="decryptedChat"></div>
+                    </div>
+                    <div class="proof-section">
+                        <h5>🔍 Attestation Data</h5>
+                        <div id="decryptedAttestations"></div>
+                    </div>
+                    <div class="proof-section">
+                        <h5>🔐 Integrity Verification</h5>
+                        <div id="decryptedIntegrity"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Status Bar -->
+        <footer class="status-bar">
+            <span id="connectionStatus">🔴 Disconnected</span>
+            <span id="secretAiMode">Secret AI: Unknown</span>
+            <span id="lastUpdate">Last update: Never</span>
+        </footer>
+    </div>
+    
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

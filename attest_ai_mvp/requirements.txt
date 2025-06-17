@@ -1,0 +1,25 @@
+# Core FastAPI Framework
+fastapi==0.104.1
+uvicorn==0.24.0
+pydantic==2.10.4
+pydantic-settings==2.6.1
+
+# Secret AI SDK (from official requirements)
+secret-sdk>=1.8.1
+secret-ai-sdk
+langchain==0.3.13
+cryptography==44.0.0
+
+# HTTP & Utilities
+httpx==0.27.2
+aiofiles==23.2.1
+beautifulsoup4==4.12.2
+python-multipart==0.0.6
+
+# Additional utilities
+python-dotenv==1.0.0
+jinja2==3.1.2
+
+# Testing
+pytest==7.4.0
+pytest-asyncio==0.21.1
