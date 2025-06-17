@@ -1,0 +1,40 @@
+A TDX Attestation Report contains several cryptographic measurements that prove the integrity of the Confidential Virtual Machine. These values are generated during the boot process and serve as a verifiable fingerprint of the system state.
+
+Below are the key fields that validate the integrity of a SecretVM instance:
+
+Field
+Description
+MRTD
+(Measurement Register for Trust Domain)
+
+Contains the cryptographic hash of the firmware running in the TEE. This is measured within the SEAM (Secure Arbitration Mode).
+
+RTMR0
+
+Measures firmware-related configuration elements such as:
+- Configuration Firmware Volume (CFV)
+- Trusted Domain Hand-Off Blocks (TDHOB)
+- ACPI tables and more.  Refer to Intel TDX Virtual Firmware Design Guide for full details
+
+RTMR1
+
+Contains the measurement (hash) of the Linux kernel used by the SecretVM.
+
+RTMR2
+
+Measures the kernel command line and the Initial RAM Filesystem (initramfs).
+
+RTMR3
+
+Measures the root file system and the docker-compose.yaml file that defines the container workload.
+
+reportdata
+
+A special field that concatenates:
+- The fingerprint of the TLS certificate generated on the VM. T
+- The nonce of the GPU Attestation Quote (for GPU-enabled machines only).
+
+These measurements establish a chain of trust between each software layer of the VM—from firmware to container runtime—enabling secure and verifiable confidential workloads.
+
+The architectural diagram below illustrates how each of these measurements maps to specific components of the SecretVM stack:
+
